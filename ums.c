@@ -2,93 +2,13 @@
 #include <string.h>
 #include <stdlib.h>
 
-struct node {
-  int depth;
-  struct node *parent;
-  struct node *prev;
-  struct node *next;
-  char move[6][6];
-};
+#include "ums.h"
 
-// FIFO
-int fifo_size;
-struct node *first_node = NULL;
-struct node *current_node = NULL;
-struct node *last_node = NULL;
-struct node *solution_node = NULL;
-
-
-int new_moves = 0;
-int prev_depth = 0;
-
-char level40[6][6] = {
-  {'-', '-', ' ', '|', '|', '|'},
-  {'-', '-', ' ', '|', '|', '|'},
-  {'|', '|', '*', '*', '|', ' '},
-  {'|', '|', '|', ' ', ' ', ' '},
-  {'|', ' ', '|', '-', '-', ' '},
-  {'|', ' ', ' ', '-', '-', ' '}
-};
-
-char level26[6][6] = {
-  {'|', '-', '-', '-', '-', ' '},
-  {'|', ' ', ' ', '-', '-', '-'},
-  {'*', '*', ' ', '|', ' ', '|'},
-  {'-', '-', '-', '|', '|', '|'},
-  {'-', '-', '-', '-', '|', '|'},
-  {' ', ' ', ' ', ' ', ' ', ' '}
-};
-
-char level20[6][6] = {
-  {'-', '-', '-', '-', ' ', '|'},
-  {'|', '-', '-', '-', '-', '|'},
-  {'|', '|', '|', '*', '*', '|'},
-  {'|', '|', '|', '|', ' ', ' '},
-  {'|', '|', '|', '|', '-', '-'},
-  {' ', ' ', '|', '-', '-', '-'}
-};
-
-char level3[6][6] = {
-  {'|', '-', '-', '-', '-', ' '},
-  {'|', ' ', '|', ' ', ' ', ' '},
-  {'*', '*', '|', '|', '|', ' '},
-  {' ', ' ', ' ', '|', '|', ' '},
-  {'-', '-', '-', '|', '|', ' '},
-  {' ', ' ', ' ', ' ', ' ', ' '}
-};
-
-char level1[6][6] = {
-  {'-', '-', '-', ' ', ' ', '|'},
-  {' ', ' ', '|', ' ', ' ', '|'},
-  {'*', '*', '|', ' ', ' ', '|'},
-  {'|', ' ', '|', ' ', '-', '-'},
-  {'|', ' ', ' ', ' ', '|', ' '},
-  {'-', '-', '-', ' ', '|', ' '}
-};
-
-char test[6][6] = {
-  {' ', ' ', '-', '-', ' ', ' '},
-  {' ', ' ', ' ', ' ', ' ', ' '},
-  {' ', ' ', ' ', ' ', ' ', ' '},
-  {' ', ' ', ' ', ' ', ' ', ' '},
-  {' ', ' ', ' ', ' ', ' ', ' '},
-  {' ', ' ', ' ', ' ', ' ', ' '}
-};
-
-char empty[6][6] = {
-  {' ', ' ', ' ', ' ', ' ', ' '},
-  {' ', ' ', ' ', ' ', ' ', ' '},
-  {' ', ' ', ' ', ' ', ' ', ' '},
-  {' ', ' ', ' ', ' ', ' ', ' '},
-  {' ', ' ', ' ', ' ', ' ', ' '},
-  {' ', ' ', ' ', ' ', ' ', ' '}
-};
-
-
-void next_moves();
-void add(char move[][6]);
-int equals(char a[][6], char b[][6]);
-void printm(char move[][6]);
+#include "puzzles/empty.h"
+#include "puzzles/test.h"
+#include "puzzles/beginner.h"
+#include "puzzles/intermediate.h"
+#include "puzzles/advanced.h"
 
 
 int main(int argc, char *argv[]) {
@@ -99,7 +19,7 @@ int main(int argc, char *argv[]) {
   root.parent = NULL;
   root.prev = NULL;
   root.next = NULL;
-  memcpy(root.move, level26, sizeof(char) * 36);
+  memcpy(root.move, beginner_puzzle40, sizeof(char) * 36);
   first_node = current_node = last_node = &root;  
   fifo_size = 1;
 
@@ -128,13 +48,14 @@ int main(int argc, char *argv[]) {
       printf("Move %d:\n", current_node->depth);
       printm(current_node->move);
     }
-    printf("Solution found in %d moves.\n", solution_node->depth);
+    printf("Solution found in %u moves (%u tested moves).\n", solution_node->depth, fifo_size);
   } else {
     printf("No solution found.\n");
   }
 
   return 0;
 }
+
 
 int equals(char a[][6], char b[][6]) {
   short i, j;
@@ -146,6 +67,7 @@ int equals(char a[][6], char b[][6]) {
   }
   return 1;
 }
+
 
 void add(char move[][6]) {
   // Do not add a previous move
@@ -175,6 +97,7 @@ void add(char move[][6]) {
   new_moves++;
   fifo_size++;
 }
+
 
 void next_moves() {
   char working_move[6][6];
@@ -278,6 +201,7 @@ void next_moves() {
   }
 
 } // end next_moves();
+
 
 void printm(char move[][6]) {
   short i, j;
