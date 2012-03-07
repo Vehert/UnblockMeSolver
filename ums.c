@@ -69,7 +69,7 @@ int equals(char a[][6], char b[][6]) {
 }
 
 
-void add(char move[][6]) {
+void add(char move[][6], unsigned short i, unsigned short j) {
   // Do not add a previous move
   struct node *n = last_node;
   do {
@@ -84,6 +84,8 @@ void add(char move[][6]) {
   new_node->parent = current_node;
   new_node->prev = last_node;
   new_node->next = NULL;
+  new_node->piece_moved_i = i;
+  new_node->piece_moved_j = j;
 
   last_node->next = new_node;
   last_node = new_node;
@@ -112,97 +114,109 @@ void next_moves() {
       if (piece == '-' || piece == '*') {
 	// Horizontal pieces of size 2
 
-	// Move right
-	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	for (k = j + 2; k < 6 && current_node->move[i][k] == ' '; k++) {
-	  next_move[i][k] = piece;
-	  next_move[i][k - 2] = ' ';
-	  add(next_move);
-	  if (k == 5 && piece == '*') {
-	    solution_node = last_node;
-	    return;
-	  }
-	}
+	if (! (current_node->piece_moved_i == i && current_node->piece_moved_j == j)) {
 
-	// Move left
-	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	for (k = j - 1; k >= 0 && current_node->move[i][k] == ' '; k--) {
-	  next_move[i][k] = piece;
-	  next_move[i][k + 2] = ' ';
-	  add(next_move);
-	}       
+	  // Move right
+	  memcpy(next_move, current_node->move, sizeof(char) * 36);
+	  for (k = j + 2; k < 6 && current_node->move[i][k] == ' '; k++) {
+	    if (k == 5 && piece == '*') {
+	      solution_node = last_node;
+	      return;
+	    }
+	    next_move[i][k] = piece;
+	    next_move[i][k - 2] = ' ';
+	    add(next_move, i, k - 1);
+	  }
+
+	  // Move left
+	  memcpy(next_move, current_node->move, sizeof(char) * 36);
+	  for (k = j - 1; k >= 0 && current_node->move[i][k] == ' '; k--) {
+	    next_move[i][k] = piece;
+	    next_move[i][k + 2] = ' ';
+	    add(next_move, i, k);
+	  }
+	
+	}
 	// Mark the piece as dealt
-	working_move[i][j] = 'x';
 	working_move[i][j + 1] = 'x';
 
       } else if (piece == '|') {
 	// Vertical pieces of size 2
 
-	// Move up
-	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	for (k = i - 1; k >= 0 && current_node->move[k][j] == ' '; k--) {
-	  next_move[k][j] = '|';
-	  next_move[k + 2][j] = ' ';
-	  add(next_move);
+	if (! (current_node->piece_moved_i == i && current_node->piece_moved_j == j)) {
+
+	  // Move up
+	  memcpy(next_move, current_node->move, sizeof(char) * 36);
+	  for (k = i - 1; k >= 0 && current_node->move[k][j] == ' '; k--) {
+	    next_move[k][j] = '|';
+	    next_move[k + 2][j] = ' ';
+	    add(next_move, k, j);
+	  }
+
+	  // Move down
+	  memcpy(next_move, current_node->move, sizeof(char) * 36);
+	  for (k = i + 2; k < 6 && current_node->move[k][j] == ' '; k++) {
+	    next_move[k - 2][j] = ' ';
+	    next_move[k][j] = '|';
+	    add(next_move, k - 1, j);
+	  }
+
 	}
 
-	// Move down
-	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	for (k = i + 2; k < 6 && current_node->move[k][j] == ' '; k++) {
-	  next_move[k - 2][j] = ' ';
-	  next_move[k][j] = '|';
-	  add(next_move);
-        }
-
 	// Mark the piece as dealt
-	working_move[i][j] = 'x';
 	working_move[i + 1][j] = 'x';
 
       } else if (piece == 'I') {
 	// Vertical pieces of size 3
 
-	// Move up
-	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	for (k = i - 1; k >= 0 && current_node->move[k][j] == ' '; k--) {
-	  next_move[k][j] = 'I';
-	  next_move[k + 3][j] = ' ';
-	  add(next_move);
+	if (! (current_node->piece_moved_i == i && current_node->piece_moved_j == j)) {
+
+	  // Move up
+	  memcpy(next_move, current_node->move, sizeof(char) * 36);
+	  for (k = i - 1; k >= 0 && current_node->move[k][j] == ' '; k--) {
+	    next_move[k][j] = 'I';
+	    next_move[k + 3][j] = ' ';
+	    add(next_move, k, j);
+	  }
+
+	  // Move down
+	  memcpy(next_move, current_node->move, sizeof(char) * 36);
+	  for (k = i + 3; k < 6 && current_node->move[k][j] == ' '; k++) {
+	    next_move[k][j] = 'I';
+	    next_move[k - 3][j] = ' ';
+	    add(next_move, k - 2, j);
+	  }
+       
 	}
 
-	// Move down
-	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	for (k = i + 3; k < 6 && current_node->move[k][j] == ' '; k++) {
-	  next_move[k][j] = 'I';
-	  next_move[k - 3][j] = ' ';
-	  add(next_move);
-	}
-       
 	// Mark the piece as dealt
-	working_move[i][j] = 'x';
 	working_move[i + 1][j] = 'x';
 	working_move[i + 2][j] = 'x';
 
       } else if (working_move[i][j] == '=') {
 	// Horizontal pieces of size 3
 
-	// Move left
-	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	for (k = j - 1; k >= 0 && current_node->move[i][k] == ' '; k--) {
-	  next_move[i][k] = '=';
-	  next_move[i][k + 3] = ' ';
-	  add(next_move);
+	if (! (current_node->piece_moved_i == i && current_node->piece_moved_j == j)) {
+
+	  // Move left
+	  memcpy(next_move, current_node->move, sizeof(char) * 36);
+	  for (k = j - 1; k >= 0 && current_node->move[i][k] == ' '; k--) {
+	    next_move[i][k] = '=';
+	    next_move[i][k + 3] = ' ';
+	    add(next_move, i, k);
+	  }
+
+	  // Move right
+	  memcpy(next_move, current_node->move, sizeof(char) * 36);
+	  for (k = j + 3; k < 6 && current_node->move[i][k] == ' '; k++) {
+	    next_move[i][k] = '=';
+	    next_move[i][k - 3] = ' ';
+	    add(next_move, i, k - 2);
+	  }
+       
 	}
 
-	// Move right
-	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	for (k = j + 3; k < 6 && current_node->move[i][k] == ' '; k++) {
-	  next_move[i][k] = '=';
-	  next_move[i][k - 3] = ' ';
-	  add(next_move);
-	}
-       
 	// Mark the piece as dealt
-	working_move[i][j] = 'x';
 	working_move[i][j + 1] = 'x';
 	working_move[i][j + 2] = 'x';
 
