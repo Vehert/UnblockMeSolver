@@ -130,7 +130,6 @@ void next_moves() {
 	while (k - 1 >= 0 && current_node->move[k - 1][j] == ' ') {
 	  next_move[k - 1][j] = '|';
 	  next_move[end - (start - k)][j] = ' ';
-	  //printm(next_move);
 	  add(next_move);
 	  k--;
 	}
@@ -141,7 +140,6 @@ void next_moves() {
 	while (k + 1 <= 5 && current_node->move[k + 1][j] == ' ') {
 	  next_move[k + 1][j] = '|';
 	  next_move[start + (k - end)][j] = ' ';
-	  //printm(next_move);
 	  add(next_move);
 	  k++;
 	}
@@ -172,7 +170,6 @@ void next_moves() {
 	while (k - 1 >= 0 && current_node->move[i][k - 1] == ' ') {
 	  next_move[i][k - 1] = piece;
 	  next_move[i][end - (start - k)] = ' ';
-	  //printm(next_move);
 	  add(next_move);
 	  k--;
 	}
@@ -183,7 +180,6 @@ void next_moves() {
 	while (k + 1 <= 5 && current_node->move[i][k + 1] == ' ') {
 	  next_move[i][k + 1] = piece;
 	  next_move[i][start + (k - end)] = ' ';
-	  //printm(next_move);
 	  add(next_move);
 	  if (piece == '*' && k + 1 == 5) {
 	    solution_node = last_node;
