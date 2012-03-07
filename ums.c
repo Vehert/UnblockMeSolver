@@ -75,7 +75,7 @@ void add(char move[][6], unsigned short i, unsigned short j) {
   do {
     if (equals(n->move, move))
       return;
-  } while ((n = n->prev) != NULL);
+  } while (((n = n->prev) != NULL) && (current_node->depth - n->depth < 3));
 
   struct node *new_node = malloc(sizeof(struct node));
   memcpy(new_node->move, move, sizeof(char) * 36);
