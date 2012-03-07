@@ -59,8 +59,8 @@ int main(int argc, char *argv[]) {
 
 int equals(char a[][6], char b[][6]) {
   short i, j;
-  for (i = 0; i < 6; i++) {
-    for (j = 0; j < 6; j++) {
+  for (j = 0; j < 6; j++) {
+    for (i = 0; i < 6; i++) {
       if (a[i][j] != b[i][j])
 	return 0;
     }
@@ -72,15 +72,10 @@ int equals(char a[][6], char b[][6]) {
 void add(char move[][6]) {
   // Do not add a previous move
   struct node *n = last_node;
-  if (equals(n->move, move)) {
-    return;
-  }
-  while (n->prev != NULL) {
-    n = n->prev;
-    if (equals(n->move, move)) {
+  do {
+    if (equals(n->move, move))
       return;
-    }
-  }
+  } while ((n = n->prev) != NULL);
 
   struct node *new_node = malloc(sizeof(struct node));
   memcpy(new_node->move, move, sizeof(char) * 36);
@@ -102,94 +97,114 @@ void add(char move[][6]) {
 void next_moves() {
   char working_move[6][6];
   char next_move[6][6];
-  short i, j, k, start, end;
+  short i, j, k;
+  char piece;
 
   memcpy(working_move, current_node->move, sizeof(char) * 36);
 
-  for (i = 0; i < 6; i++) {
-    for (j = 0; j < 6; j++) {
-      
-      if (working_move[i][j] == '|') {
-	// Vertical pieces
+  for (j = 0; j < 6; j++) {
+    for (i = 0; i < 6; i++) {
+    
+      piece = working_move[i][j];
+      if (piece == ' ')
+	continue;
 
-	// Locate the piece
-	start = i;
-	while (start - 1 >= 0 && working_move[start - 1][j] == '|')
-	  start--;
-	end = i;
-	while (end + 1 <= 5 && working_move[end + 1][j] == '|')
-	  end++;
-	// If the piece's length is > 3 then there is in fact 2 pieces
-	if (end - start >= 3)
-	  end = start + 1;
-	//printf("Piece starts at %d,%d and ends at %d,%d\n", start, j, end, j);
-	
-	// Move up
-	k = start;
+      if (piece == '-' || piece == '*') {
+	// Horizontal pieces of size 2
+
+	// Move right
 	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	while (k - 1 >= 0 && current_node->move[k - 1][j] == ' ') {
-	  next_move[k - 1][j] = '|';
-	  next_move[end - (start - k)][j] = ' ';
+	for (k = j + 2; k < 6 && current_node->move[i][k] == ' '; k++) {
+	  next_move[i][k] = piece;
+	  next_move[i][k - 2] = ' ';
 	  add(next_move);
-	  k--;
+	  if (k == 5 && piece == '*') {
+	    solution_node = last_node;
+	    return;
+	  }
+	}
+
+	// Move left
+	memcpy(next_move, current_node->move, sizeof(char) * 36);
+	for (k = j - 1; k >= 0 && current_node->move[i][k] == ' '; k--) {
+	  next_move[i][k] = piece;
+	  next_move[i][k + 2] = ' ';
+	  add(next_move);
+	}       
+	// Mark the piece as dealt
+	working_move[i][j] = 'x';
+	working_move[i][j + 1] = 'x';
+
+      } else if (piece == '|') {
+	// Vertical pieces of size 2
+
+	// Move up
+	memcpy(next_move, current_node->move, sizeof(char) * 36);
+	for (k = i - 1; k >= 0 && current_node->move[k][j] == ' '; k--) {
+	  next_move[k][j] = '|';
+	  next_move[k + 2][j] = ' ';
+	  add(next_move);
 	}
 
 	// Move down
-	k = end;
 	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	while (k + 1 <= 5 && current_node->move[k + 1][j] == ' ') {
-	  next_move[k + 1][j] = '|';
-	  next_move[start + (k - end)][j] = ' ';
+	for (k = i + 2; k < 6 && current_node->move[k][j] == ' '; k++) {
+	  next_move[k - 2][j] = ' ';
+	  next_move[k][j] = '|';
 	  add(next_move);
-	  k++;
+        }
+
+	// Mark the piece as dealt
+	working_move[i][j] = 'x';
+	working_move[i + 1][j] = 'x';
+
+      } else if (piece == 'I') {
+	// Vertical pieces of size 3
+
+	// Move up
+	memcpy(next_move, current_node->move, sizeof(char) * 36);
+	for (k = i - 1; k >= 0 && current_node->move[k][j] == ' '; k--) {
+	  next_move[k][j] = 'I';
+	  next_move[k + 3][j] = ' ';
+	  add(next_move);
+	}
+
+	// Move down
+	memcpy(next_move, current_node->move, sizeof(char) * 36);
+	for (k = i + 3; k < 6 && current_node->move[k][j] == ' '; k++) {
+	  next_move[k][j] = 'I';
+	  next_move[k - 3][j] = ' ';
+	  add(next_move);
 	}
        
 	// Mark the piece as dealt
-	for (k = start; k <= end; k++)
-	  working_move[k][j] = 'x';
+	working_move[i][j] = 'x';
+	working_move[i + 1][j] = 'x';
+	working_move[i + 2][j] = 'x';
 
-      } else if (working_move[i][j] == '-' || working_move[i][j] == '*') {
-	// Horizontal pieces
-	char piece = working_move[i][j];
-
-	// Locate the piece
-	start = j;
-	while (start - 1 >= 0 && working_move[i][start - 1] == piece)
-	  start--;
-	end = j;
-	while (end + 1 <= 5 && working_move[i][end + 1] == piece)
-	  end++;
-	// If the piece's length is > 3 then there is in fact 2 pieces
-	if (end - start >= 3)
-	  end = start + 1;
-	//printf("Piece starts at %d,%d and ends at %d,%d\n", i, start, i, end);
+      } else if (working_move[i][j] == '=') {
+	// Horizontal pieces of size 3
 
 	// Move left
-	k = start;
 	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	while (k - 1 >= 0 && current_node->move[i][k - 1] == ' ') {
-	  next_move[i][k - 1] = piece;
-	  next_move[i][end - (start - k)] = ' ';
+	for (k = j - 1; k >= 0 && current_node->move[i][k] == ' '; k--) {
+	  next_move[i][k] = '=';
+	  next_move[i][k + 3] = ' ';
 	  add(next_move);
-	  k--;
 	}
 
 	// Move right
-	k = end;
 	memcpy(next_move, current_node->move, sizeof(char) * 36);
-	while (k + 1 <= 5 && current_node->move[i][k + 1] == ' ') {
-	  next_move[i][k + 1] = piece;
-	  next_move[i][start + (k - end)] = ' ';
+	for (k = j + 3; k < 6 && current_node->move[i][k] == ' '; k++) {
+	  next_move[i][k] = '=';
+	  next_move[i][k - 3] = ' ';
 	  add(next_move);
-	  if (piece == '*' && k + 1 == 5) {
-	    solution_node = last_node;
-	  }
-	  k++;
 	}
        
 	// Mark the piece as dealt
-	for (k = start; k <= end; k++)
-	  working_move[i][k] = 'x';
+	working_move[i][j] = 'x';
+	working_move[i][j + 1] = 'x';
+	working_move[i][j + 2] = 'x';
 
       }
 
